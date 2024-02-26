@@ -26,36 +26,9 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.cic.incidencias.errores.Error;
 import com.cic.incidencias.reportes.DatIncCorrimiento2;
-import com.cic.incidencias.reportes.DatIncDiaEconomico;
 import com.cic.incidencias.reportes.DatIncReposicion;
 
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-
-/* CODIGO DE SALIDA DE PROCEDIMIENTOS ALMACENADOS
-
-CAPTURA DE INCIDENCIAS QUE SON REPOSICION DE HORARIO
-
-* 1 TODO ESTA OK
-* 2 LA HORA INICIO ES MENOR QUE LAS 6 AM
-* 3 LA HORA FIN ES MAYOR QUE LAS 10 PM
-* 4 YA SE LLEGO AL TOPE DE 2 INCIENCIAS EN LA QUICENA ACTIVA
-* 5 LA INCIDENCIA NO PERTENECE A LA QUINCENA ACTIVA
-* 6 TRATA DE CARGAR UNA INCIDENCIA EN UN DIA QUE NO DA CLASES
-* 7 INCIDENCIA DUPLICADA
-* 8 LA INCIDENCIA NO SE ENCUENTRA SOBRE SOLO Y SOLO UN HORARIO
-    DE CLASES DE UN DIA DE LA SEMANA
-* 9 LA INCIENCIA CAPTURADA Y LAS OBSERVACIONES NO CONINCIDEN
-
-CAPTURA DE LAS COMPENSACIONES DE LA REPOSICION DE HORARIO
-
-*10 LA COMPENSACION CAPTURADA ESTA DUPLICADA
-*11 LA COMPENSACION CAPTURADA ES EL HORARIO DE PROFESOR O NO ESTACUBRIENDO
-    TIEMPO EXTRA AL HORARIO DEL DIA QUE ESCOGIO
-*12 EL TIEMPO EXTRA QUE DEBE CUBRIR ES DISTINTO AL QUE BUBRIO
-    Y SE CANCELA LA OPERACION COMPLETA
-
-*/
-
 @Service
 public class Incidencias {
     @Autowired
@@ -82,12 +55,10 @@ public class Incidencias {
     @Value("${param.nombre.INCIDENCIA}")
     private String parametroListaInc;
 
-    
+    @Transactional(readOnly = false)
     public ResponseEntity getRespuestaDiaEconomico(DatDiaEconomico inc)
     {
-        Map<String, Object> parametros = new HashMap<String, Object>();
         Map<String, Object> listHorMemoInc = null;
-        Collection<DatIncDiaEconomico> listaInclist = new ArrayList<DatIncDiaEconomico>();
         String rutaReporte = "";
         Error error = new Error();
         Integer respInc = 1;
@@ -111,41 +82,48 @@ public class Incidencias {
                 throw new Exception();
             }
 
-            rutaReporte = carpetaPDF+crypto.crearSHA512(String.valueOf(idSalida)+reportEconomico+fecha.getFechaHoraUTC())+".pdf";
+            listHorMemoInc = datos.listaDiaEconomicoMemosPdf(inc.getUsuario(), idSalida);
 
-            Map<String, Object> respMemo = sp.SpIngresaDatosMemo
+            Map<String, Object> res = fecha.getExtraeFechasFromIniFin
             (
-                null, 
-                idSalida, 
-                fecha.getAnoCreacion(), 
-                Base64.getEncoder().encodeToString(rutaReporte.getBytes())
+                (String)listHorMemoInc.get("fecha_ini_compensacion"), 
+                (String)listHorMemoInc.get("fecha_fin_compensacion")
             );
 
-            diaEcoBool = (Integer)respMemo.get("bool_salida");
-            listHorMemoInc = datos.listaDiaEconomicoMemosPdf(inc.getUsuario(), idSalida);
-            listaInclist.add(
-                    new DatIncDiaEconomico
-                    (
-                        (String)listHorMemoInc.get("fecha_ini_compensacion"),
-                        (String)listHorMemoInc.get("fecha_fin_compensacion")
-                    )
+            for( int i = 1; i < res.size(); i++ )
+            {
+                Map<String, Object> res2 = (Map<String, Object>)res.get(i+"");
+                Map<String, Object> parametros = new HashMap<String, Object>();
+
+                rutaReporte = carpetaPDF+crypto.crearSHA512(String.valueOf(idSalida)+reportEconomico+fecha.getFechaHoraUTC()+i)+".pdf";
+
+                Map<String, Object> respMemo = sp.SpIngresaDatosMemo
+                (
+                    null, 
+                    idSalida, 
+                    fecha.getAnoCreacion(), 
+                    Base64.getEncoder().encodeToString(rutaReporte.getBytes())
                 );
 
-            parametros.put(parametroListaInc, new JRBeanCollectionDataSource(listaInclist));
-            parametros.put(parametroMemo, respMemo.get("serie_memos"));
+                diaEcoBool = (Integer)respMemo.get("bool_salida");
 
-            if( diaEcoBool != 1 )
-            {
-                respInc = 0;
-                error.setCodigo(diaEcoBool);
-                throw new Exception();
-            }
+                if( diaEcoBool != 1 )
+                {
+                    respInc = 0;
+                    error.setCodigo(diaEcoBool);
+                    throw new Exception();
+                }
 
-            if( reporte.generaReporte(parametros, reportEconomico, rutaReporte, inc.getUsuario()) != 1 )
-            {
-                respInc = 0;
-                error.setCodigo(100);
-                throw new Exception();
+                parametros.put("DiaInc", res2.get("dia"));
+                parametros.put("MesInc", res2.get("mes"));
+                parametros.put("AnoInc", res2.get("ano"));
+
+                if( reporte.generaReporte(parametros, reportEconomico, rutaReporte, inc.getUsuario()) != 1 )
+                {
+                    respInc = 0;
+                    error.setCodigo(100);
+                    throw new Exception();
+                }
             }
             
         } catch (Exception e) {

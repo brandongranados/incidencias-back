@@ -49,6 +49,12 @@ public class Error {
             case 14:
                 salida = "Solo se pueden solictar 3 dias economicos consecutivos";
                 break;
+            case 15:
+                salida = "Tipo de documento no permitido";
+                break;
+            case 16:
+                salida = "No fue posible procesar su documento excel";
+                break;
             default:
                 salida = "Error interno contactar al jefe del departamento";
                 break;

@@ -39,12 +39,17 @@ public class Reporte {
     private String parametroFecha;
     @Value("${param.nombre.HORARIO}")
     private String parametroListaHorario;
+    @Value("${reporte.diaeconomico}")
+    private String reportEconomico;
 
-    public int generaReporte(Map<String, Object> param, String jasper, String destino, String usuario)
+    public int generaReporte(Map<String, Object> param, String jasper, String destino, String usuario) throws Exception
     {
         int salida = 1;
 
-        param = this.datosProfesor(param, usuario);
+        if( !reportEconomico.contains("Economico") )
+            param = this.datosProfesor(param, usuario);
+        else
+            param = this.datosProfesorEconomico(param, usuario);
 
         try {
             JasperReport leerJasper = (JasperReport) JRLoader.loadObjectFromFile(jasper);
@@ -56,6 +61,22 @@ public class Reporte {
         }
 
         return salida;
+    }
+
+    private Map<String, Object> datosProfesorEconomico(Map<String, Object> parametros, String usuario)throws Exception
+    {
+        Map<String, Object> datosMemo = datos.datosUsuarioMemo(usuario);
+        Map<String, String> fechaHoy = fecha.getDiaMesAno("", true);
+
+        parametros.put(parametroIPN, variableIPN);
+        parametros.put(parametroESCOM, variableESCOM);
+        parametros.put("Nombre", (String)datosMemo.get("nombre"));
+        parametros.put("Tarjeta", (String)datosMemo.get("terjeta_cic"));
+        parametros.put("Dia", fechaHoy.get("dia"));
+        parametros.put("Mes", fechaHoy.get("mes"));
+        parametros.put("Ano", fechaHoy.get("ano"));
+
+        return parametros;
     }
 
     private Map<String, Object> datosProfesor(Map<String, Object> parametros, String usuario)
