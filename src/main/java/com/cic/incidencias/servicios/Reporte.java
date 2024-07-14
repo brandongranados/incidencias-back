@@ -46,7 +46,7 @@ public class Reporte {
     {
         int salida = 1;
 
-        if( !reportEconomico.contains("Economico") )
+        if( !jasper.contains("Economico") )
             param = this.datosProfesor(param, usuario);
         else
             param = this.datosProfesorEconomico(param, usuario);

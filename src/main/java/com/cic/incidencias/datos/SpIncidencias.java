@@ -9,6 +9,158 @@ import jakarta.persistence.ParameterMode;
 import jakarta.persistence.StoredProcedureParameter;
 
 @Entity
+
+//PARA USUARIOS ADMINISTRADORES
+
+@NamedStoredProcedureQuery
+(
+    name = "SpIncidencias.spIncidenciaReposicionSinRestricciones", 
+    procedureName = "sp_incidencia_reposicion_sin_restricciones",
+    parameters = {
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "tarjeta_cic", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "hora_ini", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "hora_fin", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "observaciones", 
+            type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "inci_capturada", 
+            type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "bool", 
+            type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "usuario", 
+            type = String.class
+            )
+    }
+)
+@NamedStoredProcedureQuery
+(
+    name = "SpIncidencias.spIncidenciaCorrimientoSinRestricciones", 
+    procedureName = "sp_incidencia_corrimiento_sin_restricciones",
+    parameters = {
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "tarjeta", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "hora_ini", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "hora_fin", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "bool_salida", 
+            type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "id_salida", 
+            type = Integer.class
+            ),
+        
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "usuario", 
+            type = String.class
+            )
+    }
+)
+@NamedStoredProcedureQuery
+(
+    name = "SpIncidencias.spIncidenciaDiaEconomicoSinRestricciones", 
+    procedureName = "sp_incidencia_dia_economico_sin_restricciones",
+    parameters = {
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "tarjeta", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha_ini", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha_fin", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "bool_salida", 
+            type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "id_salida", 
+            type = Integer.class
+            ),
+        
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "usuario", 
+            type = String.class
+            )
+    }
+)
+//jajajjajajajjajaj
 @NamedStoredProcedureQuery
 (
     name = "SpIncidencias.spValidaIncidenciaReposicion", 
@@ -48,6 +200,11 @@ import jakarta.persistence.StoredProcedureParameter;
             mode = ParameterMode.OUT, 
             name = "inci_capturada", 
             type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
             )
     }
 )
@@ -127,6 +284,11 @@ import jakarta.persistence.StoredProcedureParameter;
             mode = ParameterMode.OUT, 
             name = "id_salida", 
             type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
             )
     }
 )
@@ -151,6 +313,11 @@ import jakarta.persistence.StoredProcedureParameter;
             type = String.class
             ),
         @StoredProcedureParameter(
+            mode = ParameterMode.IN, 
+            name = "fecha", 
+            type = String.class
+            ),
+        @StoredProcedureParameter(
             mode = ParameterMode.OUT, 
             name = "bool_salida", 
             type = Integer.class
@@ -159,6 +326,11 @@ import jakarta.persistence.StoredProcedureParameter;
             mode = ParameterMode.OUT, 
             name = "id_salida", 
             type = Integer.class
+            ),
+        @StoredProcedureParameter(
+            mode = ParameterMode.OUT, 
+            name = "nombre_prof", 
+            type = String.class
             )
     }
 )

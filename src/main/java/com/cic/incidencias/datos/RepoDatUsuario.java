@@ -23,6 +23,17 @@ public interface RepoDatUsuario extends CrudRepository<vUsuarioDiasHoras, Long>{
     (
         @Param("nom_usuario") String usuario
     );
+
+    @Query
+    (
+        value = "SELECT TOP 1 * FROM v_usuario_dias_horas WHERE "+
+                "CAST(terjeta_cic AS VARCHAR) = :terjeta_cic ", 
+        nativeQuery = true
+    )
+    public Map<String, Object> datosUsusarioTarjeta
+    (
+        @Param("terjeta_cic") String tarjeta
+    );
     
     @Query
     (
@@ -103,54 +114,131 @@ public interface RepoDatUsuario extends CrudRepository<vUsuarioDiasHoras, Long>{
 
     @Query
     (
-        value = "SELECT * FROM ( "+
-                    "SELECT *, ROW_NUMBER() "+
-                    "OVER (ORDER BY numero_serie DESC) as row_num "+
-                    "FROM v_lista_datos_incidencias_memos "+ 
-                    "WHERE (:fecha_incidencia IS NULL OR fecha_incidencia = :fecha_incidencia) "+
-                    "AND (:fecha_registro IS NULL OR fecha_registro = :fecha_registro) "+
-                    "AND (:busqueda IS NULL OR (nom_usuario LIKE '%' + :busqueda + '%' "+ 
-                        "OR nombre LIKE '%' + :busqueda + '%' "+ 
-                        "OR serie_memos LIKE '%' + :busqueda + '%' "+  
-                        "OR tipo LIKE '%' + :busqueda + '%')) "+
-                ") AS sub "+
-                "WHERE (row_num > ( (:paginacion - 1) * 100) + 1 ) "+
-                "AND (row_num <= (:paginacion * 100))",
+        value = "SELECT id_prof_incidencia, nombre,\n" + //
+            "            fecha_incidencia,\n" + //
+            "            hora_ini_incidencia,\n" + //
+            "            hora_fin_incidencia,\n" + //
+            "            fecha_registro,\n" + //
+            "            serie_memos,\n" + //
+            "            correo_electronico,\n" + //
+            "            nom_usuario,\n" + //
+            "            tarjeta,\n" + //
+            "            autorizada_admin,\n" + //
+            "            tipo,\n" + //
+            "            ruta_doc," + //
+            "            numero_serie,\n" + //
+            "            tipo_num,\n" + //
+            "            observaciones" + //
+            "        FROM v_lista_datos_incidencias_memos\n" + //
+            "    WHERE ( :fecha_ini IS NULL OR :fecha_fin IS NULL OR \n" + //
+            "                 ( fecha_incidencia BETWEEN :fecha_ini AND :fecha_fin ) ) AND \n" + //
+            "            (\n" + //
+            "                :busqueda IS NULL OR\n" + //
+            "                (\n" + //
+            "                    nombre LIKE ('%' + :busqueda + '%') OR\n" + //
+            "                    correo_electronico LIKE ('%' + :busqueda + '%') OR\n" + //
+            "                    serie_memos LIKE ('%' + :busqueda + '%') OR\n" + //
+            "                    tipo LIKE ('%' + :busqueda + '%')\n" + //
+            "                )\n" + //
+            "            )\n" + //
+            "    ORDER BY numero_serie DESC\n" + //
+            "    OFFSET ( ( :paginacion -1) *10 ) \n" + //
+            "    ROWS FETCH NEXT ( :paginacion *10) ROWS ONLY",
         nativeQuery = true
     )
     public List<Map<String, Object>> getListaDatosIncidenciasMemos
     (
-        @Param("fecha_incidencia") String fechaIni,
-        @Param("fecha_registro") String fechaFin,
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
         @Param("busqueda") String busqueda,
         @Param("paginacion") Integer paginacion
     );
+
     @Query
     (
-        value = "SELECT * FROM ( "+
-                    "SELECT *, ROW_NUMBER() "+
-                    "OVER (ORDER BY numero_serie DESC) as row_num "+
-                    "FROM v_lista_datos_dia_economico_memos "+ 
-                    "WHERE (:fecha_ini_compensacion IS NULL OR fecha_ini_compensacion = :fecha_ini_compensacion) "+
-                    "AND (:fecha_fin_compensacion IS NULL OR fecha_fin_compensacion = :fecha_fin_compensacion) "+
-                    "AND (:fecha_registro IS NULL OR fecha_registro = :fecha_registro) "+
-                    "AND (:busqueda IS NULL OR (nom_usuario LIKE '%' + :busqueda + '%' "+ 
-                        "OR nombre LIKE '%' + :busqueda + '%' "+ 
-                        "OR correo_electronico LIKE '%' + :busqueda + '%' "+ 
-                        "OR serie_memos LIKE '%' + :busqueda + '%' "+  
-                        "OR tipo LIKE '%' + :busqueda + '%')) "+
-                ") AS sub "+
-                "WHERE (row_num > ( (:paginacion - 1) * 100) + 1 ) "+
-                "AND (row_num <= (:paginacion * 100))",
+        value = "SELECT COUNT(*) AS cant\n" + //
+        "        FROM v_lista_datos_incidencias_memos\n" + //
+        "    WHERE ( :fecha_ini IS NULL OR :fecha_fin IS NULL OR \n" + //
+        "                 ( fecha_incidencia BETWEEN :fecha_ini AND :fecha_fin ) ) AND \n" + //
+        "            (\n" + //
+        "                :busqueda IS NULL OR\n" + //
+        "                (\n" + //
+        "                    nombre LIKE ('%' + :busqueda + '%') OR\n" + //
+        "                    correo_electronico LIKE ('%' + :busqueda + '%') OR\n" + //
+        "                    serie_memos LIKE ('%' + :busqueda + '%') OR\n" + //
+        "                    tipo LIKE ('%' + :busqueda + '%')\n" + //
+        "                )\n" + //
+        "            )",
+        nativeQuery = true
+    )
+    public Map<String, Object> getCantListaDatosIncidenciasMemos
+    (
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
+        @Param("busqueda") String busqueda
+    );
+
+    @Query(
+        value = "SELECT * FROM v_lista_datos_incidencias_memos "+
+                " WHERE id_prof_incidencia = :id ",
+        nativeQuery = true
+    )
+    public Map<String, Object> getBuscaIncidenciasId
+    (
+        @Param("id") Integer id
+    );
+    
+
+    @Query(
+        value = "SELECT fecha_compensacion, hora_ini_compensacion, hora_fin_compensacion, ( cant_tiempo_cubre / 60 ) AS horas_cubre "+
+                " FROM v_profesor_usuario_reposicion "+
+                " WHERE id_prof_incidencia = :id_prof_incidencia",
+        nativeQuery = true
+    )
+    public List<Map<String, Object>> getMemosRepComComplemento
+    (
+        @Param("id_prof_incidencia") String idProfIncidencia
+    );
+    @Query
+    (
+        value = "SELECT *\n" + //
+                "    FROM v_lista_datos_dia_economico_memos \n" + //
+                "    WHERE ( :fecha_ini IS NULL OR :fecha_fin IS NULL OR \n" + //
+                "    ( fecha_pertenece BETWEEN :fecha_ini AND :fecha_fin )) AND\n" + //
+                "    (:busqueda IS NULL OR ( nombre LIKE '%' + :busqueda + '%'  \n" + //
+                "        OR correo_electronico LIKE '%' + :busqueda + '%'  \n" + //
+                "        OR serie_memos LIKE '%' + :busqueda + '%'   \n" + //
+                "        OR tipo LIKE '%' + :busqueda + '%')) \n" + //
+                "    ORDER BY numero_serie DESC\n" + //
+                "    OFFSET ( ( :paginacion -1) *10 ) \n" + //
+                "    ROWS FETCH NEXT ( :paginacion * 10 ) ROWS ONLY",
         nativeQuery = true
     )
     public List<Map<String, Object>> getListaDatosEconomicoMemos
     (
-        @Param("fecha_ini_compensacion") String fechaIniCompensacion,
-        @Param("fecha_fin_compensacion") String fechaFinCompensacion,
-        @Param("fecha_registro") String fechaRegistro,
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
         @Param("busqueda") String busqueda,
         @Param("paginacion") Integer paginacion
+    );
+
+    @Query
+    (
+        value = "SELECT COUNT(*) AS cant \n" + //
+                "    FROM v_lista_datos_dia_economico_memos \n" + //
+                "    WHERE ( :fecha_ini IS NULL OR :fecha_fin IS NULL OR \n" + //
+                "    ( fecha_pertenece BETWEEN :fecha_ini AND :fecha_fin )) AND\n" + //
+                "    (:busqueda IS NULL OR ( nombre LIKE '%' + :busqueda + '%'  \n" + //
+                "        OR correo_electronico LIKE '%' + :busqueda + '%'  \n" + //
+                "        OR serie_memos LIKE '%' + :busqueda + '%'   \n" + //
+                "        OR tipo LIKE '%' + :busqueda + '%'))",
+        nativeQuery = true
+    )
+    public Map<String, Object> getCantListaDatosEconomicoMemos
+    (
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
+        @Param("busqueda") String busqueda
     );
 
     @Query
@@ -194,4 +282,5 @@ public interface RepoDatUsuario extends CrudRepository<vUsuarioDiasHoras, Long>{
         @Param("fecha_inicio") String fecha_inicio,
         @Param("fecha_fin") String fecha_fin
     );
+
 } 

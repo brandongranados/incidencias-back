@@ -1,7 +1,5 @@
 package com.cic.incidencias.datos;
 
-import java.util.ArrayList;
-
 public class DatosProfesor {
     private String nombre;
     private String apePaterno;

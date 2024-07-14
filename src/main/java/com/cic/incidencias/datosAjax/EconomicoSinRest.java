@@ -1,11 +1,9 @@
 package com.cic.incidencias.datosAjax;
 
-public class DatosPdfMemos {
+public class EconomicoSinRest {
     private String fechaIni;
     private String fechaFin;
-    private String busqueda;
-    private String paginacion;
-
+    private String tarjetaCic;
 
     public String getFechaIni() {
         return fechaIni;
@@ -19,16 +17,10 @@ public class DatosPdfMemos {
     public void setFechaFin(String fechaFin) {
         this.fechaFin = fechaFin;
     }
-    public String getBusqueda() {
-        return busqueda;
+    public String getTarjetaCic() {
+        return tarjetaCic;
     }
-    public void setBusqueda(String busqueda) {
-        this.busqueda = busqueda;
-    }
-    public String getPaginacion() {
-        return paginacion;
-    }
-    public void setPaginacion(String paginacion) {
-        this.paginacion = paginacion;
+    public void setTarjetaCic(String tarjetaCic) {
+        this.tarjetaCic = tarjetaCic;
     }
 }

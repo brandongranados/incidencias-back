@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.cic.incidencias.datos.RepoDatUsuario;
 import com.cic.incidencias.datosAjax.DatosPdfMemos;
-import com.cic.incidencias.datosAjax.DatosPdfMemosEco;
 import com.cic.incidencias.datos.RepoDatUsuario;
 
 @Service
@@ -24,27 +22,49 @@ public class Memos {
     @Autowired
     private RepoDatUsuario datos;
     
-    public ResponseEntity getMemosInc(int tipo, DatosPdfMemos datos)
+    public ResponseEntity getMemosInc(int tipo, DatosPdfMemos dat)
     {
-        try {
-            List<Map<String, Object>> inc = this.getMemosBase64Incidencias(datos);
+        Map<String, Object> resultado = new HashMap<String, Object>();
 
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(inc);
+        try {
+            List<Map<String, Object>> inc = this.getMemosBase64Incidencias(dat);
+            Map<String, Object> cant = datos.getCantListaDatosIncidenciasMemos
+            (
+                dat.getFechaIni(), 
+                dat.getFechaFin(), 
+                dat.getBusqueda()
+            );
+
+            resultado.put("lista", inc);
+            resultado.put("cant", cant.get("cant"));
         } catch (Exception e) {
                 return ResponseEntity.badRequest().build();
         }
 
+        return ResponseEntity.ok(resultado);
     }
 
-    public ResponseEntity getMemosEco(int tipo, DatosPdfMemosEco datos)
+    public ResponseEntity getMemosEco(int tipo, DatosPdfMemos dat)
     {
-        try {
-            List<Map<String, Object>> inc = this.getMemosBase64Economicos(datos);
+        Map<String, Object> resultado = new HashMap<String, Object>();
 
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(inc);
+        try {
+            List<Map<String, Object>> inc = this.getMemosBase64Economicos(dat);
+
+            Map<String, Object> cant = datos.getCantListaDatosEconomicoMemos
+            (
+                dat.getFechaIni(), 
+                dat.getFechaFin(), 
+                dat.getBusqueda()
+            );
+
+            resultado.put("lista", inc);
+            resultado.put("cant", cant.get("cant")); 
         } catch (Exception e) {
-                return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
+
+        return ResponseEntity.ok(resultado);
     }
 
     private List<Map<String, Object>> getMemosBase64Incidencias(DatosPdfMemos memos) throws Exception
@@ -52,8 +72,8 @@ public class Memos {
         List<Map<String, Object>> salida = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> res = datos.getListaDatosIncidenciasMemos
         (
-            memos.getFechaIncidencia(), 
-            memos.getFechaResgistro(), 
+            memos.getFechaIni(), 
+            memos.getFechaFin(), 
             memos.getBusqueda(), 
             Integer.parseInt(memos.getPaginacion())
         );
@@ -64,6 +84,8 @@ public class Memos {
             String arch = this.memoBase64((String)doc.get("ruta_doc"));
 
             docSal.put("nom_usuario", doc.get("nom_usuario"));
+            docSal.put("id_prof_incidencia", doc.get("id_prof_incidencia"));
+            docSal.put("tarjeta", doc.get("tarjeta"));
             docSal.put("nombre", doc.get("nombre"));
             docSal.put("fecha_incidencia", doc.get("fecha_incidencia"));
             docSal.put("hora_ini_incidencia", doc.get("hora_ini_incidencia"));
@@ -83,15 +105,14 @@ public class Memos {
         return salida;
     }
 
-    private List<Map<String, Object>> getMemosBase64Economicos(DatosPdfMemosEco memos) throws Exception
+    private List<Map<String, Object>> getMemosBase64Economicos(DatosPdfMemos memos) throws Exception
     {
         List<Map<String, Object>> salida = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> res = datos.getListaDatosEconomicoMemos
         (
-            memos.getFechaIniCompensacion(), 
-            memos.getFechaFinCompensacion(), 
-            memos.getFechaRegistro(),
-            memos.getBusqueda(),
+            memos.getFechaIni(), 
+            memos.getFechaFin(), 
+            memos.getBusqueda(), 
             Integer.parseInt(memos.getPaginacion())
         );
 
@@ -99,18 +120,22 @@ public class Memos {
         {
             Map<String,Object> docSal = new HashMap<>();
             String arch = this.memoBase64((String)doc.get("ruta_doc"));
-
+            
+            docSal.put("id_compensacion_dia_economico", doc.get("id_compensacion_dia_economico"));
             docSal.put("nom_usuario", doc.get("nom_usuario"));
             docSal.put("nombre", doc.get("nombre"));
             docSal.put("correo_electronico", doc.get("correo_electronico"));
+            docSal.put("tarjeta", doc.get("tarjeta"));
             docSal.put("fecha_ini_compensacion", doc.get("fecha_ini_compensacion"));
             docSal.put("fecha_fin_compensacion", doc.get("fecha_fin_compensacion"));
+            docSal.put("fecha_pertenece", doc.get("fecha_pertenece"));
             docSal.put("numero_serie", doc.get("numero_serie"));
             docSal.put("serie_memos", doc.get("serie_memos"));
             docSal.put("ruta_doc", arch);
             docSal.put("fecha_registro", doc.get("fecha_registro"));
             docSal.put("tipo", doc.get("tipo"));
             docSal.put("tipo_num", doc.get("tipo_num"));
+            docSal.put("autorizada_admin", doc.get("autorizada_admin"));
 
             salida.add(docSal);
         }

@@ -64,7 +64,10 @@ public class Configuracion {
     CorsConfigurationSource configuracionCors()
     {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("*"));
+        //desarrollo
+        //config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        //productivo
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("POST"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setAllowCredentials(true);

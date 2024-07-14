@@ -53,8 +53,9 @@ public interface SpIncidenciasImp extends JpaRepository<SpIncidencias, Long>{
     public Map<String, Object> SpValidaIncDiaEconomico
     (
         @Param("usuario") String usuario,
-        @Param("fecha_ini") String fecha,
-        @Param("fecha_fin") String horaIni
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
+        @Param("fecha") String fecha
     );
 
     //PROCEDIMIENTOS DEDICADOS CREACION DE MEMOS
@@ -102,5 +103,82 @@ public interface SpIncidenciasImp extends JpaRepository<SpIncidencias, Long>{
         @Param("usuario") String usuario,
         @Param("correo") String correo,
         @Param("contra") String contra
+    );
+
+    //PROCEDIMIENTOS PARA ADMINISTRADORES
+    @Procedure(name = "SpIncidencias.spIncidenciaReposicionSinRestricciones")
+    public Map<String, Object> spIncidenciaReposicionSinRestricciones
+    (
+        @Param("tarjeta_cic") String usuario,
+        @Param("fecha") String fecha,
+        @Param("hora_ini") String hora_ini,
+        @Param("hora_fin") String hora_fin,
+        @Param("observaciones") Integer observaciones
+    );
+
+    @Procedure(procedureName = "sp_valida_compensacion_reposicion_sin_restricciones")
+    public Integer spValidaCompensacionReposicionSinRestricciones
+    (
+        @Param("tarjeta_cic") String tarjetaCic, 
+        @Param("fecha") String fecha,
+        @Param("hora_ini") String horaIni,
+        @Param("hora_fin") String horaFin,
+        @Param("id_prof_inc_repo") Integer idIncidencia,
+        @Param("minutos_cubre") Integer minutosCubre
+    );
+
+    @Procedure(name = "SpIncidencias.spIncidenciaCorrimientoSinRestricciones")
+    public Map<String, Object> spIncidenciaCorrimientoSinRestricciones
+    (
+        @Param("tarjeta") String tarjeta, 
+        @Param("fecha") String fecha,
+        @Param("hora_ini") String horaIni,
+        @Param("hora_fin") String horaFin
+    );
+
+    @Procedure(name = "SpIncidencias.spIncidenciaDiaEconomicoSinRestricciones")
+    public Map<String, Object> spIncidenciaDiaEconomicoSinRestricciones
+    (
+        @Param("tarjeta") String tarjeta, 
+        @Param("fecha_ini") String fechaIni,
+        @Param("fecha_fin") String fechaFin,
+        @Param("fecha") String fecha
+    );
+
+    /* ACTUALIZACIONES DESDE ADMINISTRADORES */
+
+    @Procedure(procedureName = "sp_actualiza_corrimiento_sin_restricciones")
+    public Integer spActualizaCorrimientoSinRestricciones
+    (
+        @Param("fecha") String fecha, 
+        @Param("hora_ini") String horaIni,
+        @Param("hora_fin") String horaFin,
+        @Param("id") Integer id
+    );
+
+    @Procedure(procedureName = "sp_actualiza_reposicion_sin_restricciones")
+    public Integer spActualizaReposicionSinRestricciones
+    (
+        @Param("fecha_inc") String fechaInc, 
+        @Param("hora_ini_inc") String horaIniInc,
+        @Param("hora_fin_inc") String horaFinInc,
+        @Param("observaciones") String observaciones,
+        @Param("id") Integer id
+    );
+
+    @Procedure(procedureName = "sp_actualiza_valida_compensacion_reposicion")
+    public Integer spActualizaValidaCompensacionReposicion
+    (
+        @Param("fecha") String fecha, 
+        @Param("hora_ini") String horaIni,
+        @Param("hora_fin") String horaFin,
+        @Param("minutos_cubre") Integer minutosCubre,
+        @Param("id") Integer id
+    );
+
+    @Procedure(procedureName = "sp_borra_compensaciones_reposicion")
+    public Integer spBorraCompensacionesReposicion
+    (
+        @Param("id") Integer id
     );
 }
