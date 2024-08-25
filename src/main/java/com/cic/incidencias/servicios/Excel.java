@@ -118,13 +118,12 @@ public class Excel {
             {
                 DatosProfesor p = new DatosProfesor();
                 Row renglon = pestana.getRow(f);
-                String nombres[] = renglon.getCell(0).getStringCellValue().toUpperCase().trim().split(" ");
                         
-                p.setApePaterno(nombres[0]);
-                p.setApeMaterno(nombres[1]);
-                p.setNombre(this.getNombres(nombres));
-                p.setTarjeta(renglon.getCell(1).getStringCellValue().toUpperCase().replaceAll(" ", ""));
-                p.setTipo( renglon.getCell(7).getStringCellValue().toUpperCase().equals("BASE") ? 1 : 0 );
+                p.setApePaterno(renglon.getCell(0).getStringCellValue().toUpperCase());
+                p.setApeMaterno(renglon.getCell(1).getStringCellValue().toUpperCase());
+                p.setNombre(renglon.getCell(2).getStringCellValue().toUpperCase());
+                p.setTarjeta(renglon.getCell(3).getStringCellValue().toUpperCase().replaceAll(" ", ""));
+                p.setTipo( renglon.getCell(9).getStringCellValue().toUpperCase().equals("BASE") ? 1 : 0 );
 
                 bool = sp.SpAgregaDatosProfesor
                 (
@@ -140,7 +139,7 @@ public class Excel {
                     throw new Exception();
                 }
 
-                for( int i = 2; i<7; i++ )
+                for( int i = 4; i<9; i++ )
                 {
                     Cell celda = renglon.getCell(i);
 
@@ -162,7 +161,7 @@ public class Excel {
         if( valor.length() == 0 )
             return;
 
-        valor.replaceAll(" ", "");
+        valor = valor.replaceAll(" ", "");
         horarios = valor.split(",");
 
         for( String horarioUnico : horarios )
@@ -176,19 +175,19 @@ public class Excel {
 
             switch (num) 
             {
-                case 2:
+                case 4:
                     nuevo.setDia("lu");
                     break;
-                case 3:
+                case 5:
                     nuevo.setDia("ma");
                     break;
-                case 4:
+                case 6:
                     nuevo.setDia("mi");
                     break;
-                case 5:
+                case 7:
                     nuevo.setDia("ju");
                     break;
-                case 6:
+                case 8:
                     nuevo.setDia("vi");
                     break;
                 default:
@@ -224,15 +223,5 @@ public class Excel {
         }
 
         return;
-    }
-
-    private String getNombres(String nombres[])
-    {
-        String temp[] = new String[nombres.length - 2];
-
-        for( int i=0; i<temp.length; i++ )
-            temp[i] = nombres[i+2];
-
-        return String.join(" ", temp);
     }
 }
